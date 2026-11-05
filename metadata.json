@@ -1,0 +1,8 @@
+{
+  "name": "Node js build",
+  "description": "ecommerce",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

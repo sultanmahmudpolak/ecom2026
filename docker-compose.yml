@@ -1,0 +1,25 @@
+services:
+  stockmaster-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stockmaster-bd-vps
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - TZ=Asia/Dhaka
+      - NODE_NO_WARNINGS=1
+      # Optional: Connect external PostgreSQL or MySQL in the future by setting DATABASE_URL
+      - DATABASE_URL=${DATABASE_URL:-}
+    volumes:
+      # Persistent SQLite (WAL) & JSON Backup Storage
+      - stockmaster_data:/app/data
+      # Persistent Product & Logo Image Uploads
+      - stockmaster_uploads:/app/uploads
+
+volumes:
+  stockmaster_data:
+  stockmaster_uploads:

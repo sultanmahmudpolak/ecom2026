@@ -1,0 +1,73 @@
+# ============================================================================
+# StockMaster BD - Standard cPanel (LiteSpeed & Apache) .htaccess
+# ============================================================================
+
+Options -MultiViews -Indexes
+DirectoryIndex index.php index.html
+ErrorDocument 404 /index.php
+
+<IfModule mod_mime.c>
+    AddType application/javascript .js .mjs
+    AddType text/css .css
+    AddType image/svg+xml .svg
+    AddType image/webp .webp
+    AddType application/json .json
+</IfModule>
+
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml text/javascript application/javascript application/x-javascript application/json application/ld+json application/xml image/svg+xml font/ttf font/otf font/woff font/woff2
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/javascript application/javascript application/x-javascript application/json application/ld+json application/xml image/svg+xml font/ttf font/otf font/woff font/woff2
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header append Vary Accept-Encoding
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Block direct HTTP access to sensitive internal files and configs
+    RewriteRule (^|/)(env\.php|erp_persistent_state\.json|package(-lock)?\.json|composer\.(json|lock)|tsconfig\.json|vite\.config\.ts|server\.ts)$ - [F,L]
+    RewriteRule \.(sql|md|lock|env|example|log|bak|ini|sh|yml|yaml)$ - [F,L]
+    RewriteRule ^/?backend/(config|controllers|middleware|repositories|services|validators)/ - [F,L]
+    RewriteRule ^/?uploads/.*\.(php|php[0-9]|phtml|phar|pl|py|cgi|sh|bash|exe|dll|asp|aspx|jsp|svg|html|htm|js|mjs)$ - [F,L]
+
+    # 2. Direct access to Web Installer & PHP API entry points
+    RewriteRule ^/?install\.php$ - [L]
+    RewriteRule ^/?api/install\.php$ - [L]
+    RewriteRule ^/?backend/api/install\.php$ - [L]
+    RewriteRule ^/?api/index\.php$ - [L]
+    RewriteRule ^/?backend/api/index\.php$ - [L]
+
+    # 3. Route /api/* requests to api/index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/?api/(.*)$ api/index.php?route=$1 [QSA,L]
+
+    # 4. If deep SPA route requests nested ./assets/* or ./uploads/*, map to root assets/* or uploads/*
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/?(.+)/assets/(.*)$ assets/$2 [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^/?(.+)/uploads/(.*)$ uploads/$2 [L]
+
+    # 5. Route all SPA frontend routes (/smart, /landing/*, /product/*, /checkout) to index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
